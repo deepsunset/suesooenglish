@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maizy Chen's Last Chance 영어 낱말카드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 12px 30px;
+            font-size: 17px;
+            border: 3px solid white;
+            border-radius: 25px;
+            cursor: pointer;
+            background: transparent;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .card-counter {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+
+        .card-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card-front {
+            background: white;
+        }
+
+        .card-back {
+            background: #f8f9fa;
+            transform: rotateY(180deg);
+        }
+
+        .word {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .meaning {
+            font-size: 1.5em;
+            color: #555;
+            text-align: center;
+        }
+
+        .example-label {
+            font-size: 1.2em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .answer {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .example-en {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-style: italic;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .example-kr {
+            font-size: 1em;
+            color: #666;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .nav-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .nav-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .edit-mode {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .edit-mode h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .edit-group {
+            margin-bottom: 20px;
+        }
+
+        .edit-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .edit-group input,
+        .edit-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .edit-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .edit-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .edit-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .save-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #ddd;
+            color: #333;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .flip-hint {
+            color: rgba(0,0,0,0.3);
+            font-size: 14px;
+            margin-top: 20px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Maizy Chen's Last Chance</h1>
+        <p>영어 낱말카드 (Ch. 4~10)</p>
+    </div>
+
+    <div class="mode-selector">
+        <button class="mode-btn active" id="mode-en" onclick="setMode('english')">🇬🇧 영어 → 한국어</button>
+        <button class="mode-btn" id="mode-kr" onclick="setMode('korean')">🇰🇷 한국어 → 영어</button>
+    </div>
+
+    <div class="controls">
+        <button onclick="shuffleCards()">🔀 카드 섞기</button>
+        <button onclick="toggleEditMode()">✏️ 현재 카드 수정</button>
+        <button onclick="resetCards()">🔄 초기화</button>
+    </div>
+
+    <div class="card-counter">
+        <span id="current-card">1</span> / <span id="total-cards">28</span>
+    </div>
+
+    <div id="edit-panel" class="edit-mode hidden">
+        <h2>카드 수정하기</h2>
+        <div class="edit-group">
+            <label>영어 단어</label>
+            <input type="text" id="edit-word" placeholder="영어 단어를 입력하세요">
+        </div>
+        <div class="edit-group">
+            <label>한국어 뜻</label>
+            <input type="text" id="edit-meaning" placeholder="한국어 뜻을 입력하세요">
+        </div>
+        <div class="edit-group">
+            <label>영어 예문</label>
+            <textarea id="edit-example-en" placeholder="영어 예문을 입력하세요"></textarea>
+        </div>
+        <div class="edit-group">
+            <label>한국어 해석</label>
+            <textarea id="edit-example-kr" placeholder="한국어 해석을 입력하세요"></textarea>
+        </div>
+        <div class="edit-buttons">
+            <button class="cancel-btn" onclick="cancelEdit()">취소</button>
+            <button class="save-btn" onclick="saveEdit()">저장</button>
+        </div>
+    </div>
+
+    <div class="card-container">
+        <div class="card" id="flashcard" onclick="flipCard()">
+            <div class="card-face card-front">
+                <div class="word" id="word">cleaver</div>
+                <div class="meaning hidden" id="meaning">(정육용) 큰 칼</div>
+                <div class="flip-hint">카드를 클릭하면 뜻과 예문을 볼 수 있어요</div>
+            </div>
+            <div class="card-face card-back">
+                <div class="example-label">📝 정답 및 예문</div>
+                <div class="answer" id="answer">(정육용) 큰 칼</div>
+                <hr style="width: 80%; margin: 20px auto; border: 1px solid #ddd;">
+                <div class="example-en" id="example-en">Oma used a cleaver to chop the meat.</div>
+                <div class="example-kr" id="example-kr">할머니(Oma)가 고기를 다질 때 큰 칼을 사용했습니다.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-button" id="prev-btn" onclick="previousCard()">◀ 이전</button>
+        <button class="nav-button" id="next-btn" onclick="nextCard()">다음 ▶</button>
+    </div>
+
+    <script>
+        let cards = [
+            // 1. 음식 및 주방 관련 표현
+            {
+                word: "cleaver",
+                meaning: "(정육용) 큰 칼",
+                exampleEn: "Oma used a cleaver to chop the meat.",
+                exampleKr: "할머니(Oma)가 고기를 다질 때 큰 칼을 사용했습니다."
+            },
+            {
+                word: "wok",
+                meaning: "웍 (중국식 냄비)",
+                exampleEn: "She cooked vegetables in a wok.",
+                exampleKr: "그녀는 웍에서 채소를 볶았습니다."
+            },
+            {
+                word: "diced",
+                meaning: "깍둑썰기한",
+                exampleEn: "Add diced pork to the pan.",
+                exampleKr: "팬에 깍둑썰기한 돼지고기를 넣으세요."
+            },
+            {
+                word: "mince",
+                meaning: "(고기나 채소를) 갈다, 잘게 다지다",
+                exampleEn: "Mince the garlic finely.",
+                exampleKr: "마늘을 곱게 다지세요."
+            },
+            {
+                word: "sizzling",
+                meaning: "지글지글 소리를 내는",
+                exampleEn: "The sizzling sound filled the kitchen.",
+                exampleKr: "지글지글 소리가 부엌을 가득 채웠습니다."
+            },
+            {
+                word: "deep fryer",
+                meaning: "튀김기",
+                exampleEn: "The wontons were cooked in a deep fryer.",
+                exampleKr: "만두는 튀김기에서 조리되었습니다."
+            },
+            {
+                word: "chop suey",
+                meaning: "찹수이 (미국식 중국 요리)",
+                exampleEn: "We ordered chop suey for dinner.",
+                exampleKr: "우리는 저녁으로 찹수이를 주문했습니다."
+            },
+            {
+                word: "braised",
+                meaning: "(국물에 넣고) 푹 삶은, 졸인",
+                exampleEn: "She made braised eggplant for the meal.",
+                exampleKr: "그녀는 식사를 위해 가지 조림을 만들었습니다."
+            },
+            // 2. 동작 및 상태 묘사
+            {
+                word: "flinch",
+                meaning: "주춤하다, 움찔하다",
+                exampleEn: "Maizy flinched when Oma grabbed the cleaver.",
+                exampleKr: "할머니가 큰 칼을 잡았을 때 Maizy는 움찔했습니다."
+            },
+            {
+                word: "pivot",
+                meaning: "(축을 중심으로) 회전하다",
+                exampleEn: "She pivoted quickly like a basketball player.",
+                exampleKr: "그녀는 농구 선수처럼 빠르게 회전했습니다."
+            },
+            {
+                word: "morph",
+                meaning: "변하다, 바뀌다",
+                exampleEn: "The white dumplings morphed into golden ones.",
+                exampleKr: "하얀 만두가 황금색으로 변했습니다."
+            },
+            {
+                word: "weary",
+                meaning: "매우 지친",
+                exampleEn: "Mom looked weary after the long drive.",
+                exampleKr: "엄마는 긴 운전 후 매우 지쳐 보였습니다."
+            },
+            {
+                word: "gawk",
+                meaning: "멍하게 바라보다",
+                exampleEn: "They gawked at the spooky mansion.",
+                exampleKr: "그들은 으스스한 저택을 멍하게 바라보았습니다."
+            },
+            {
+                word: "tiptoe",
+                meaning: "발꿈치를 들고 살금살금 걷다",
+                exampleEn: "She tiptoed across the creaky floor.",
+                exampleKr: "그녀는 삐걱거리는 마루를 살금살금 걸었습니다."
+            },
+            {
+                word: "cusp",
+                meaning: "~의 직전, 문턱",
+                exampleEn: "They were on the cusp of a talk.",
+                exampleKr: "그들은 대화가 막 시작되려는 찰나였습니다."
+            },
+            // 3. 사물 및 배경 관련
+            {
+                word: "memorabilia",
+                meaning: "수집품, 기념품",
+                exampleEn: "The walls were covered with old memorabilia.",
+                exampleKr: "벽은 오래된 기념품들로 가득했습니다."
+            },
+            {
+                word: "mismatched",
+                meaning: "어울리지 않는, 짝이 맞지 않는",
+                exampleEn: "The restaurant had mismatched chairs.",
+                exampleKr: "식당에는 제각각인 의자들이 있었습니다."
+            },
+            {
+                word: "bait 'n' tackle",
+                meaning: "낚시 미끼와 도구 판매점",
+                exampleEn: "We stopped at the bait 'n' tackle shop.",
+                exampleKr: "우리는 낚시 미끼 가게에 들렀습니다."
+            },
+            {
+                word: "five & dime",
+                meaning: "(과거 미국의) 잡화점",
+                exampleEn: "The old five & dime sold cheap items.",
+                exampleKr: "옛날 잡화점은 저렴한 물건들을 팔았습니다."
+            },
+            {
+                word: "depot",
+                meaning: "(기차) 역, 창고",
+                exampleEn: "The train depot was old and abandoned.",
+                exampleKr: "기차역은 오래되고 버려져 있었습니다."
+            },
+            {
+                word: "cobweb",
+                meaning: "거미줄",
+                exampleEn: "Cobwebs covered the old station.",
+                exampleKr: "거미줄이 오래된 역을 덮고 있었습니다."
+            },
+            // 4. 관용구 및 어려운 표현
+            {
+                word: "family-style",
+                meaning: "음식을 큰 접시에 담아 다 같이 덜어 먹는 방식",
+                exampleEn: "The meal was served family-style.",
+                exampleKr: "음식은 가족식으로 제공되었습니다."
+            },
+            {
+                word: "Asian perm",
+                meaning: "아시아식 파마",
+                exampleEn: "Mom wanted an Asian perm to fit in.",
+                exampleKr: "엄마는 어울리기 위해 아시아식 파마를 원했습니다."
+            },
+            {
+                word: "pry a story out",
+                meaning: "(남이 하기 싫어하는 말을) 캐묻다, 알아내다",
+                exampleEn: "It was hard to pry a story out of Oma.",
+                exampleKr: "할머니에게서 이야기를 캐내기 어려웠습니다."
+            },
+            {
+                word: "food stylist",
+                meaning: "푸드 스타일리스트",
+                exampleEn: "The food stylist made the dish look perfect.",
+                exampleKr: "푸드 스타일리스트가 요리를 완벽하게 보이게 만들었습니다."
+            },
+            // 추가 단어들 (문맥상 중요한 표현들)
+            {
+                word: "wonton",
+                meaning: "완탕, 만두",
+                exampleEn: "The deep fried wontons were crispy.",
+                exampleKr: "튀긴 완탕은 바삭했습니다."
+            },
+            {
+                word: "spooky",
+                meaning: "으스스한, 무서운",
+                exampleEn: "The mansion looked spooky at night.",
+                exampleKr: "저택은 밤에 으스스해 보였습니다."
+            },
+            {
+                word: "abandoned",
+                meaning: "버려진, 방치된",
+                exampleEn: "The abandoned depot was covered in dust.",
+                exampleKr: "버려진 역은 먼지로 덮여 있었습니다."
+            }
+        ];
+
+        let currentIndex = 0;
+        let currentMode = 'english'; // 'english' or 'korean'
+        const originalCards = JSON.parse(JSON.stringify(cards));
+
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // 버튼 활성화 상태 변경
+            document.getElementById('mode-en').classList.remove('active');
+            document.getElementById('mode-kr').classList.remove('active');
+            
+            if (mode === 'english') {
+                document.getElementById('mode-en').classList.add('active');
+            } else {
+                document.getElementById('mode-kr').classList.add('active');
+            }
+            
+            updateCard();
+        }
+
+        function updateCard() {
+            const card = cards[currentIndex];
+            const wordEl = document.getElementById('word');
+            const meaningEl = document.getElementById('meaning');
+            const answerEl = document.getElementById('answer');
+            
+            if (currentMode === 'english') {
+                // 영어 → 한국어 모드: 앞면에 영어만
+                wordEl.textContent = card.word;
+                wordEl.classList.remove('hidden');
+                meaningEl.classList.add('hidden');
+                answerEl.textContent = card.meaning;
+                document.querySelector('.flip-hint').textContent = '카드를 클릭하면 뜻과 예문을 볼 수 있어요';
+            } else {
+                // 한국어 → 영어 모드: 앞면에 한국어만
+                meaningEl.textContent = card.meaning;
+                meaningEl.classList.remove('hidden');
+                wordEl.classList.add('hidden');
+                answerEl.textContent = card.word;
+                document.querySelector('.flip-hint').textContent = '카드를 클릭하면 영어 단어와 예문을 볼 수 있어요';
+            }
+            
+            document.getElementById('example-en').textContent = card.exampleEn;
+            document.getElementById('example-kr').textContent = card.exampleKr;
+            document.getElementById('current-card').textContent = currentIndex + 1;
+            document.getElementById('total-cards').textContent = cards.length;
+            
+            // 카드 뒤집기 상태 초기화
+            document.getElementById('flashcard').classList.remove('flipped');
+            
+            // 버튼 상태 업데이트
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            document.getElementById('next-btn').disabled = currentIndex === cards.length - 1;
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+                updateCard();
+            }
+        }
+
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCard();
+            }
+        }
+
+        function shuffleCards() {
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function resetCards() {
+            cards = JSON.parse(JSON.stringify(originalCards));
+            currentIndex = 0;
+            updateCard();
+        }
+
+        function toggleEditMode() {
+            const editPanel = document.getElementById('edit-panel');
+            const isHidden = editPanel.classList.contains('hidden');
+            
+            if (isHidden) {
+                const card = cards[currentIndex];
+                document.getElementById('edit-word').value = card.word;
+                document.getElementById('edit-meaning').value = card.meaning;
+                document.getElementById('edit-example-en').value = card.exampleEn;
+                document.getElementById('edit-example-kr').value = card.exampleKr;
+                editPanel.classList.remove('hidden');
+            } else {
+                editPanel.classList.add('hidden');
+            }
+        }
+
+        function saveEdit() {
+            cards[currentIndex] = {
+                word: document.getElementById('edit-word').value,
+                meaning: document.getElementById('edit-meaning').value,
+                exampleEn: document.getElementById('edit-example-en').value,
+                exampleKr: document.getElementById('edit-example-kr').value
+            };
+            updateCard();
+            document.getElementById('edit-panel').classList.add('hidden');
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-panel').classList.add('hidden');
+        }
+
+        // 키보드 단축키
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') previousCard();
+            if (e.key === 'ArrowRight') nextCard();
+            if (e.key === ' ') {
+                e.preventDefault();
+                flipCard();
+            }
+        });
+
+        // 초기화
+        updateCard();
+    </script>
+</body>
+</html>
